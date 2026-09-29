@@ -1,0 +1,559 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mein Mondkompass · V16</title>
+<style>
+:root{--bg:#f3f0e8;--paper:#fffdf8;--ink:#29332e;--muted:#727a72;--line:#dcddd5;--sage:#718374;--sage2:#e8eee7;--sand:#f2eadb;--rose:#f4e6e7;--blue:#e4eef0;--warn:#f7e7df}
+*{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.48 system-ui,-apple-system,Segoe UI,sans-serif}
+main{max-width:1040px;margin:auto;padding:18px}.top{font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);padding:5px 2px 14px}
+.hero{display:grid;grid-template-columns:270px 1fr;gap:14px}.panel,.tile{background:var(--paper);border:1px solid var(--line);border-radius:19px}
+.moonpanel{padding:20px;text-align:center;background:#2d3532;color:#f8f5eb}.moon{width:145px;height:145px;margin:5px auto 15px;border-radius:50%;position:relative;overflow:hidden;background:#0e1412;box-shadow:0 0 25px #fff2 inset}
+.moon:before{content:"";position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle at 35% 30%,#eee9dd,#c7c5ba 47%,#898d87 76%,#5d635f)}
+.moon:after{content:"";position:absolute;top:-3%;bottom:-3%;width:100%;border-radius:50%;background:#111714;opacity:.97}.moon.wax:after{right:var(--shade)}.moon.wane:after{left:var(--shade)}
+.eyebrow{font-size:.66rem;letter-spacing:.13em;text-transform:uppercase;color:var(--muted)}.moonpanel .eyebrow{color:#ccd1cb}
+.moonpanel h1{font:500 1.9rem Georgia,serif;margin:3px}.sub{color:#d7d9d4}
+.summary{padding:23px}.summary h2{font:500 clamp(1.8rem,4vw,3.3rem) Georgia,serif;margin:4px 0 8px}.pills{display:flex;flex-wrap:wrap;gap:7px;margin-top:14px}.pill,.status{border-radius:999px;padding:5px 9px;font-size:.77rem;background:var(--sage2)}
+.focus{margin-top:14px;padding:18px}.focus h2{font:500 1.45rem Georgia,serif;margin:4px 0 8px}.focusgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.mini{padding:12px;border-left:2px solid var(--line)}.mini b{display:block;margin-bottom:3px}
+.sectiontitle{font:500 1.55rem Georgia,serif;margin:25px 2px 10px}.hint{font-size:.82rem;color:var(--muted);margin:-6px 2px 12px}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:12px}.tile{overflow:hidden}.tile summary{list-style:none;cursor:pointer;padding:16px;display:grid;grid-template-columns:42px 1fr auto;gap:11px;align-items:center}.tile summary::-webkit-details-marker{display:none}
+.icon{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;background:var(--sage2);font-size:1.15rem}.tile:nth-child(3n+2) .icon{background:var(--sand)}.tile:nth-child(3n) .icon{background:var(--rose)}
+.title b{display:block;font:500 1.13rem Georgia,serif}.title span{font-size:.78rem;color:var(--muted)}.status{white-space:nowrap}.detail{padding:0 17px 17px 69px;border-top:1px dashed var(--line)}
+.detail ul{padding-left:0;list-style:none;margin-left:0}.detail li{list-style:none}.detail li{padding:7px 0;border-bottom:1px dashed #e7e6df}.yes:before{content:"✓";color:#568060;font-weight:bold;margin-right:8px}.no:before{content:"♡";color:#a86d63;font-weight:bold;margin-right:8px}
+.source{font-size:.76rem;color:var(--muted);margin-top:9px}.mantra{font:italic 1.13rem/1.5 Georgia,serif;border-left:3px solid var(--sage);padding-left:11px}
+footer{font-size:.75rem;color:var(--muted);padding:22px 3px}
+@media(max-width:720px){.hero{grid-template-columns:1fr}.moonpanel{display:grid;grid-template-columns:145px 1fr;align-items:center;text-align:left}.moon{width:120px;height:120px;margin:auto}.tiles{grid-template-columns:1fr}.focusgrid{grid-template-columns:1fr}.detail{padding-left:17px}}
+@media(max-width:430px){.moonpanel{display:block;text-align:center}.tile summary{grid-template-columns:40px 1fr}.status{grid-column:2;justify-self:start}}
+
+.mooncycle{display:inline-block;margin-top:10px;padding:5px 10px;border:1px solid #ffffff35;border-radius:999px;font-size:.76rem;color:#e3e7e1}
+.today-inline{display:grid;grid-template-columns:repeat(3,1fr);gap:0;margin-top:18px;border-top:1px solid var(--line);padding-top:15px}
+.today-inline>div{padding:4px 14px;border-left:2px solid var(--line)}.today-inline>div:first-child{padding-left:0;border-left:0}
+.today-inline b,.today-inline span{display:block}.today-inline span{margin-top:4px}
+.tile{cursor:pointer}.tile summary{pointer-events:none}.tile .detail{display:none}
+.modal{display:none;position:fixed;inset:0;background:#26302b99;z-index:20;padding:20px;align-items:center;justify-content:center}
+.modal.open{display:flex}.modalbox{position:relative;width:min(680px,100%);max-height:86vh;overflow:auto;background:var(--paper);border-radius:22px;padding:25px;box-shadow:0 18px 60px #0004}
+.close{position:absolute;right:14px;top:10px;border:0;background:transparent;font-size:2rem;color:var(--muted);cursor:pointer}
+.modalbox .modalhead{display:grid;grid-template-columns:44px 1fr;gap:12px;align-items:center;padding-right:35px}.modalbox .modaldetail{margin-top:16px}.modaldetail ul{list-style:none;padding-left:0;margin-left:0}.modaldetail li{list-style:none}
+@media(max-width:720px){.today-inline{grid-template-columns:1fr}.today-inline>div{border-left:0;border-top:1px solid var(--line);padding:10px 0}.today-inline>div:first-child{border-top:0}}
+
+.moonviz{width:145px;height:145px;margin:5px auto 15px;display:grid;place-items:center}
+.moonviz svg{width:100%;height:100%;display:block;filter:drop-shadow(0 0 8px #ffffff18)}
+@media(max-width:720px){.moonviz{width:120px;height:120px;margin:auto}}
+@media(max-width:430px){.moonviz{margin:5px auto 14px}}
+
+.locbox{margin-top:18px;padding-top:15px;border-top:1px solid #ffffff24;text-align:left}
+.locbox label{display:block;font-size:11px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:7px;color:#e9eee9}
+.locrow{display:flex;gap:6px}.locrow input{min-width:0;width:100%;padding:9px 10px;border-radius:20px;border:1px solid #ffffff38;background:#ffffff0b;color:#fff;font:inherit;font-size:13px}
+.locrow input::placeholder{color:#ffffff8a}.locrow button{border:1px solid #ffffff38;border-radius:20px;background:#ffffff0d;color:#fff;padding:8px 12px;cursor:pointer}
+.locstatus{font-size:11px;line-height:1.35;color:#d4d9d5;margin-top:8px}
+.moontimes{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:10px}
+.moontimes span{border:1px solid #ffffff20;border-radius:12px;padding:8px;text-align:center}
+.moontimes b{display:block;font-size:16px;font-weight:500}.moontimes small{display:block;font-size:9px;color:#d4d9d5;margin-top:2px}
+
+.personal-daily{margin-top:30px;padding-top:18px;border-top:1px solid var(--line,#d9d7ce)}
+.personal-label{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#66736d;margin-bottom:10px}
+.personal-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.personal-grid .tile{margin:0;min-height:66px;background:#fffdf9}
+@media(max-width:700px){.personal-grid{grid-template-columns:1fr}}
+
+.aroma-open{display:flex;gap:12px;align-items:flex-start;padding:13px 14px;border:1px solid var(--line,#d9d7ce);border-radius:15px;background:#fffdf9}
+.aroma-icon{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;background:#edf3ed;flex:0 0 auto}
+.aroma-open b,.aroma-open span,.aroma-open small{display:block}
+.aroma-open b{font-family:Georgia,serif;font-size:17px;font-weight:500}
+.aroma-open span{font-size:13px;margin-top:3px}
+.aroma-open small{font-size:10px;color:#69736e;margin-top:5px;line-height:1.35}
+
+.aroma-copy{min-width:0;flex:1}
+.aroma-details{margin-top:9px;font-size:12px;line-height:1.45;color:#46504b}
+.aroma-details div{margin:3px 0}
+.aroma-details .soft{color:#68736d}
+
+@media(max-width:600px){
+ body{padding-left:12px;padding-right:12px}
+ .hero{gap:12px}
+ .panel{border-radius:16px}
+ .summary{padding:20px 17px}
+ .summary h2{font-size:clamp(36px,12vw,52px)}
+ .today-inline{grid-template-columns:1fr}
+ .today-inline>div{border-left:0!important;border-top:1px solid var(--line,#d9d7ce);padding:11px 0!important}
+ .today-inline>div:first-child{border-top:0}
+ .tiles{grid-template-columns:1fr}
+ .tile{min-height:72px}
+ .locrow{flex-wrap:wrap}
+ .locrow button{min-height:44px}
+ .locrow input{min-height:44px;font-size:16px}
+ .aroma-open{padding:12px}
+}
+
+/* V16 – symmetrisches Lebensbereiche-Raster */
+.tiles .tile summary{
+  min-height:100%;
+  align-items:center;
+}
+.tiles .tile .title{
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  min-width:0;
+}
+@media(min-width:701px){
+  /* 7. Kachel: Meditation & Reflexion mittig unter den drei Kachelpaaren */
+  .tiles .tile[data-key="meditation"]{
+    grid-column:1 / -1;
+    width:calc(50% - 8px);
+    justify-self:center;
+  }
+}
+@media(max-width:700px){
+  .tiles .tile[data-key="meditation"]{
+    width:auto;
+    grid-column:auto;
+    justify-self:stretch;
+  }
+}
+</style></head>
+<body><main>
+<div class="top">Mein Mondkompass · Heute</div>
+<section class="hero">
+ <div class="panel moonpanel"><div class="moonviz" id="moon"></div><div><div class="eyebrow">Mond heute</div><h1 id="phase"></h1><div class="sub" id="illum"></div><div class="mooncycle" id="cycle"></div>
+<div class="locbox">
+  <form id="locform">
+    <label for="postcode">Mondzeiten für deinen Ort</label>
+    <div class="locrow">
+      <input id="postcode" inputmode="numeric" maxlength="5" placeholder="PLZ, z. B. 63801" aria-label="Postleitzahl">
+      <button type="submit">Anzeigen</button>
+    </div>
+  </form>
+  <div id="locstatus" class="locstatus">PLZ eingeben für Mondauf- und Monduntergang.</div>
+  <div id="moontimes" class="moontimes" hidden>
+    <span>↑ <b id="moonrise">–</b><small>Mondaufgang</small></span>
+    <span>↓ <b id="moonset">–</b><small>Monduntergang</small></span>
+  </div>
+</div></div></div>
+ <div class="panel summary"><div class="eyebrow" id="date"></div><h2 id="focus"></h2><p id="intro"></p>
+<div class="pills"><span class="pill" id="zodiac"></span><span class="pill" id="element"></span><span class="pill" id="plantday"></span></div>
+<div class="today-inline"><div><b>✓ Unterstützend</b><span id="m1"></span></div><div><b>♡ Heute etwas sanfter</b><span id="m2"></span></div><div><b>🧘 Innerer Fokus</b><span id="m3"></span></div></div><div class="personal-daily">
+  <div class="personal-label">Duftimpuls für heute</div>
+  <div class="aroma-open">
+    <div class="aroma-icon">🌿</div>
+    <div class="aroma-copy">
+      <b id="aromaTitle">Duft & Aroma</b>
+      <span id="aromaText"></span>
+      <div id="aromaDetails" class="aroma-details"></div>
+      <small id="aromaNote"></small>
+    </div>
+  </div>
+</div>
+</div>
+</section>
+
+
+
+<h2 class="sectiontitle">Deine Lebensbereiche</h2>
+<p class="hint">Für kleine persönliche Empfehlungen und Hintergründe die Kachel öffnen.</p>
+<section class="tiles" id="tiles"></section><div class="modal" id="modal" aria-hidden="true"><div class="modalbox"><button class="close" id="close" aria-label="Schließen">×</button><div id="modalcontent"></div></div></div>
+<footer><b>Leselogik:</b> Der Mondkompass verbindet astronomische Angaben mit traditionellen Mondkalender-Ideen, astrologischen bzw. spirituellen Impulsen und praktischem Naturwissen. Diese Bereiche werden bewusst voneinander unterschieden. Die Anregungen sind persönliche Inspirationsangebote und enthalten keine Heilversprechen oder medizinischen Empfehlungen. Entscheide selbst, bewusst und reflektiert, was für dich stimmig und hilfreich ist – und was du einfach vorbeiziehen lässt. Duft- und Aromaideen sind ausschließlich persönliche Duftimpulse; Produkt- und Sicherheitshinweise haben Vorrang. <span class="source-note">Ortsauflösung: Open-Meteo / GeoNames; technischer Fallback: OpenStreetMap Nominatim.</span></footer>
+</main>
+<script>
+const S=29.530588853, now=new Date();
+const $=x=>document.getElementById(x);
+const rad=x=>x*Math.PI/180, deg=x=>x*180/Math.PI, norm=x=>((x%360)+360)%360;
+
+function julian(date){return date.getTime()/86400000+2440587.5}
+function sunLongitude(date){
+ const D=julian(date)-2451543.5;
+ const w=282.9404+4.70935e-5*D, e=0.016709-1.151e-9*D, M=norm(356.0470+0.9856002585*D);
+ let E=rad(M)+e*Math.sin(rad(M))*(1+e*Math.cos(rad(M)));
+ let x=Math.cos(E)-e, y=Math.sqrt(1-e*e)*Math.sin(E);
+ return norm(deg(Math.atan2(y,x))+w);
+}
+function moonLongitude(date){
+ const D=julian(date)-2451543.5;
+ const N=norm(125.1228-0.0529538083*D), i=5.1454, w=norm(318.0634+0.1643573223*D),
+       aa=60.2666,e=0.054900,M=norm(115.3654+13.0649929509*D);
+ let E=rad(M)+e*Math.sin(rad(M))*(1+e*Math.cos(rad(M)));
+ for(let q=0;q<5;q++) E=E-(E-e*Math.sin(E)-rad(M))/(1-e*Math.cos(E));
+ let x=aa*(Math.cos(E)-e),y=aa*Math.sqrt(1-e*e)*Math.sin(E),v=Math.atan2(y,x),r=Math.hypot(x,y);
+ let xe=r*(Math.cos(rad(N))*Math.cos(v+rad(w))-Math.sin(rad(N))*Math.sin(v+rad(w))*Math.cos(rad(i)));
+ let ye=r*(Math.sin(rad(N))*Math.cos(v+rad(w))+Math.cos(rad(N))*Math.sin(v+rad(w))*Math.cos(rad(i)));
+ let lon=deg(Math.atan2(ye,xe));
+ const Ms=rad(norm(356.0470+0.9856002585*D)), ws=rad(norm(282.9404+4.70935e-5*D));
+ const Ls=Ms+ws,Lm=rad(M+w+N),elong=Lm-Ls,F=Lm-rad(N),Mr=rad(M);
+ lon+=-1.274*Math.sin(Mr-2*elong)+0.658*Math.sin(2*elong)-0.186*Math.sin(Ms)
+      -0.059*Math.sin(2*Mr-2*elong)-0.057*Math.sin(Mr-2*elong+Ms)
+      +0.053*Math.sin(Mr+2*elong)+0.046*Math.sin(2*elong-Ms)
+      +0.041*Math.sin(Mr-Ms)-0.035*Math.sin(elong)-0.031*Math.sin(Mr+Ms)
+      -0.015*Math.sin(2*F-2*elong)+0.011*Math.sin(Mr-4*elong);
+ return norm(lon);
+}
+const phaseAngle=norm(moonLongitude(now)-sunLongitude(now));
+const lit=(1-Math.cos(rad(phaseAngle)))/2*100;
+const grow=phaseAngle<180;
+const a=phaseAngle/360*S;
+
+function dataFromAngle(x){
+ const near=(target,width=7)=>Math.abs(((x-target+180)%360+360)%360-180)<=width;
+ if(near(0,7)) return["Neumond","Ausrichtung","Neues bewusst beginnen","Es darf klein und ruhig beginnen","Ich öffne Raum für das, was entstehen darf."];
+ if(near(180,7)) return["Vollmond","Fülle","Wahrnehmen und würdigen","Heute lieber etwas Raum lassen und nicht alles auf einmal wollen","Ich sehe, was gewachsen ist, und würdige es."];
+ if(x<67.5)return["Zunehmende Sichel","Aufbruch","Kleine Schritte nähren","Heute lieber bei ein oder zwei Herzenssachen bleiben","Ich nähre, was wachsen darf."];
+ if(x<112.5)return["Erstes Viertel","Entscheidung","Priorisieren und handeln","Dir Zeit geben – und dann einen kleinen klaren Schritt wählen","Ich richte meine Energie auf das Wesentliche."];
+ if(x<172.5)return["Zunehmender Mond","Aufbau","Vertiefen und dranbleiben","Lieber das nähren, was schon begonnen hat","Ich bleibe bei dem, was mir wichtig ist."];
+ if(x<247.5)return["Abnehmender Mond","Loslassen","Abschließen und vereinfachen","Sanft prüfen, was du nicht mehr mitnehmen möchtest","Ich lasse leichter werden, was nicht bleiben muss."];
+ if(x<292.5)return["Letztes Viertel","Klärung","Korrigieren und sortieren","Heute darf erst einmal Ordnung entstehen","Ich behalte, was trägt, und korrigiere, was nicht mehr passt."];
+ return["Abnehmende Sichel","Ruhe","Regenerieren und reflektieren","Du darfst heute bewusst einen Gang zurückschalten","Ich muss nicht ständig leisten."];
+}
+const p=dataFromAngle(phaseAngle);
+$("date").textContent=new Intl.DateTimeFormat("de-DE",{weekday:"long",day:"numeric",month:"long",year:"numeric"}).format(now);
+$("phase").textContent=p[0];$("illum").textContent=Math.round(lit)+" % beleuchtet";$("focus").textContent="Heute: "+p[1];
+$("intro").textContent="Ein ruhiger Tageskompass aus Mondphase, traditionellen Mondkalender-Impulsen, Naturwissen und bewussten Ritualen.";
+$("cycle").textContent=(p[0]==="Vollmond"?(grow?"Noch zunehmend · Vollmondphase":"Bereits abnehmend · Vollmondphase"):(p[0]==="Neumond"?(grow?"Bereits zunehmend · Neumondphase":"Noch abnehmend · Neumondphase"):(grow?"Zunehmender Mond":"Abnehmender Mond")));
+$("m1").textContent=p[2];$("m2").textContent=p[3];$("m3").textContent=p[4];
+function renderMoon(angle,illum){
+ const el=$("moon"), phase=angle/360;
+ // Visual phase from two overlapping ellipses. Full moon is intentionally
+ // rendered fully illuminated; new moon fully dark.
+ const waxing=phase<0.5;
+ const k=Math.cos(2*Math.PI*phase); // +1 new, -1 full
+ let d="";
+ if(illum<1){
+   d=`<circle cx="75" cy="75" r="69" fill="#121815"/>`;
+ } else if(illum>99){
+   d=`<circle cx="75" cy="75" r="69" fill="url(#moontex)"/>`;
+ } else {
+   // Build the lit region as a clipped path using the terminator x-radius.
+   const rx=Math.abs(k)*69;
+   const sweep=waxing?1:0;
+   if(waxing){
+     d=`<path d="M75 6 A69 69 0 0 1 75 144 A${rx.toFixed(2)} 69 0 0 ${k>0?0:1} 75 6 Z" fill="url(#moontex)"/>`;
+   }else{
+     d=`<path d="M75 6 A69 69 0 0 0 75 144 A${rx.toFixed(2)} 69 0 0 ${k>0?1:0} 75 6 Z" fill="url(#moontex)"/>`;
+   }
+ }
+ el.innerHTML=`<svg viewBox="0 0 150 150" role="img" aria-label="${p[0]}, ${Math.round(illum)} Prozent beleuchtet">
+ <defs>
+  <radialGradient id="moontex" cx="34%" cy="28%" r="75%">
+   <stop offset="0%" stop-color="#f3efe4"/><stop offset="45%" stop-color="#d8d4c8"/>
+   <stop offset="76%" stop-color="#a8aaa3"/><stop offset="100%" stop-color="#858b86"/>
+  </radialGradient>
+  <clipPath id="disc"><circle cx="75" cy="75" r="69"/></clipPath>
+ </defs>
+ <circle cx="75" cy="75" r="70" fill="#101613" stroke="#6e7771" stroke-width="1"/>
+ <g clip-path="url(#disc)">${d}
+  <g opacity=".12" fill="#4f5652">
+   <circle cx="51" cy="48" r="10"/><circle cx="96" cy="61" r="7"/><circle cx="73" cy="101" r="12"/>
+   <circle cx="108" cy="105" r="5"/><circle cx="42" cy="91" r="6"/>
+  </g>
+ </g></svg>`;
+}
+renderMoon(phaseAngle,lit);
+
+
+// Tropisches Mondzeichen aus der oben berechneten geozentrischen Mondlänge.
+const signs=["Widder","Stier","Zwillinge","Krebs","Löwe","Jungfrau","Waage","Skorpion","Schütze","Steinbock","Wassermann","Fische"];
+const signIndex=Math.floor(moonLongitude(now)/30), sign=signs[signIndex];
+const elementMap={
+ "Widder":["Feuer","Fruchttag"],"Löwe":["Feuer","Fruchttag"],"Schütze":["Feuer","Fruchttag"],
+ "Stier":["Erde","Wurzeltag"],"Jungfrau":["Erde","Wurzeltag"],"Steinbock":["Erde","Wurzeltag"],
+ "Zwillinge":["Luft","Blütentag"],"Waage":["Luft","Blütentag"],"Wassermann":["Luft","Blütentag"],
+ "Krebs":["Wasser","Blatttag"],"Skorpion":["Wasser","Blatttag"],"Fische":["Wasser","Blatttag"]
+};
+const [elem,plantDay]=elementMap[sign];
+$("zodiac").textContent="Mond in "+sign;
+$("element").textContent="Element "+elem;
+$("plantday").textContent=plantDay;
+
+const plantAdvice={
+ "Wurzeltag":"Traditionell steht heute alles rund um Wurzeln im Mittelpunkt – etwa Möhren, Radieschen, Kartoffeln oder Zwiebeln.",
+ "Blatttag":"Traditionell richtet sich der Blick heute auf Blattpflanzen und Blattkräuter – etwa Salat, Spinat, Mangold oder Petersilie.",
+ "Blütentag":"Traditionell ist dies ein Tag für Blütenpflanzen, Blumen und blühende Kräuter – zum Beispiel Lavendel oder Kamille.",
+ "Fruchttag":"Traditionell stehen Frucht- und Samenpflanzen im Vordergrund – etwa Tomaten, Bohnen, Gurken, Kürbis oder Obst."
+}[plantDay];
+
+const common = grow ? {
+ garden:["🌱","Garten","Pflegen & Wachstum","Günstig",["Pflanzen beobachten und bedarfsgerecht pflegen.","Traditionell wird die zunehmende Phase mit Aufbau verbunden."],["Für Säen, Schneiden oder Düngen heute zusätzlich auf Pflanzenart, Wetter und Jahreszeit schauen."],"Mondkalender-Tradition + botanische Praxis"],
+ hair:["✂","Haare","Pflege & Aufbau","Neutral",["Pflege darf heute bewusst etwas mehr Raum bekommen.","Traditionell gilt der zunehmende Mond als aufbauende Phase."],["Bei intensiveren Behandlungen darf heute vor allem dein tatsächlicher Haarzustand entscheiden."],"Traditionelle Zuordnung"],
+ nails:["◉","Nägel","Sanfte Pflege","Neutral",["Öl- oder Handpflege als kleines Ritual nutzen."],["Nimm die Mondidee gern als Ritual – und orientiere dich bei deinen Nägeln vor allem daran, was ihnen wirklich guttut."],"Traditionelle Zuordnung"],
+ health:["♡","Wohlbefinden","Energie bewusst einsetzen","Achtsam",["Bewegung, Schlaf und Pausen an dein tatsächliches Befinden anpassen.","Ein kurzes Abendritual kann den Tagesabschluss markieren."],["Bei Gesundheit und Terminen zählt natürlich dein tatsächliches Befinden mehr als der Mondkalender."],"Wohlbefinden + symbolischer Mondimpuls"],
+ relations:["♡","Beziehungen","Verbindung stärken","Günstig",["Eine kleine Geste oder ein bewusstes Gespräch.","Gemeinsame Pläne konkretisieren, wenn es sich stimmig anfühlt."],["Der Mondimpuls kann dich erinnern – die echte Verbindung entsteht durch Zuhören und Offenheit."],"Astrologisch-symbolische Deutung"],
+ work:["▣","Arbeit & Projekte","Aufbauen & vertiefen","Günstig",["Einen wichtigen nächsten Schritt erledigen.","Bestehendes verbessern statt neue Baustellen eröffnen."],["Heute tut es wahrscheinlich gut, nicht zu viele Dinge gleichzeitig aufzumachen."],"Symbolischer Phasenimpuls"],
+ home:["⌂","Haushalt","Pflegen & ordnen","Neutral",["Eine kleine Zone bewusst in Ordnung bringen.","Dinge pflegen, die du behalten möchtest."],["Es muss heute keine Großaktion sein – eine kleine schöne Ecke reicht völlig."],"Praktischer Tagesimpuls"],
+ oils:["🌿","Duft & Aroma","Ätherische Öle als Duftimpuls","Duftimpuls",["Lemon als frische Duftnote für Aufbruch und Klarheit.","Frankincense als erdiger Gegenpol für einen bewussten Fokus."],["Genieße den Duft als persönlichen Ritualimpuls und beachte dabei einfach die Hinweise auf dem Produktetikett."],"Duft-/Ritualidee"],
+ meditation:["☾","Meditation","Mantra & 5 Minuten Ruhe","Empfohlen",[p[4],"Fünf Minuten ruhig sitzen und den nächsten sinnvollen Schritt visualisieren."],["Du musst dabei nichts erreichen – ein paar ruhige Minuten dürfen völlig genügen."],"Spiritueller Impuls"],
+ journal:["✎","Journaling","Eine Frage genügt","Empfohlen",["Was möchte ich heute bewusst "+(grow?"wachsen lassen?":"leichter werden lassen?")],[],"Reflexionsimpuls"]
+} : null;
+
+const waning = {
+ garden:["🌱","Garten","Pflegen & zurücknehmen","Neutral",["Pflegezustand prüfen und Überflüssiges entfernen – sofern es zur Pflanzenart und Jahreszeit passt.","Traditionell wird die abnehmende Phase mit Rückzug und Reduktion verbunden."],["Beim Schneiden heute zusätzlich darauf achten, was die jeweilige Pflanze und Jahreszeit wirklich brauchen."],"Mondkalender-Tradition + botanische Praxis"],
+ hair:["✂","Haare","Ruhige Pflege","Neutral",["Sanfte Pflege und eine einfache Routine wählen."],["Nutze die Mondphase gern als Pflegeritual und orientiere dich ansonsten daran, was dein Haar gerade braucht."],"Traditionelle Zuordnung"],
+ nails:["◉","Nägel","Pflegen statt optimieren","Neutral",["Hand- und Nagelpflege bewusst und sanft halten."],["Mach daraus gern einen kleinen Pflegemoment – entscheidend ist, was deinen Nägeln tatsächlich guttut."],"Traditionelle Zuordnung"],
+ health:["♡","Wohlbefinden","Regeneration","Achtsam",["Pausen, Schlaf und ruhige Bewegung priorisieren, wenn dein Körper danach verlangt.","Abendroutine bewusst vereinfachen."],["Für medizinische Entscheidungen und Termine bleibt dein tatsächlicher Bedarf natürlich ausschlaggebend."],"Wohlbefinden + symbolischer Mondimpuls"],
+ relations:["♡","Beziehungen","Raum & Klarheit","Neutral",["Zuhören, bevor du Lösungen anbietest.","Ungeklärtes darf auch einmal über Nacht liegen."],["Ein bisschen Rückzug darf heute einfach Ruhe bedeuten und muss nichts gegen jemanden aussagen."],"Astrologisch-symbolische Deutung"],
+ work:["▣","Arbeit & Projekte","Abschließen & sortieren","Günstig",["Offene Enden schließen.","Dokumentieren, korrigieren und vereinfachen."],["Vielleicht heute erst offene Dinge rund machen, bevor etwas Neues dazukommt."],"Symbolischer Phasenimpuls"],
+ home:["⌂","Haushalt","Reduzieren & ordnen","Günstig",["Eine Schublade, Ablage oder digitale Ecke aussortieren.","Reparieren oder weggeben, was unnötig Raum bindet."],["Eine kleine aufgeräumte Ecke darf heute völlig reichen."],"Praktischer Tagesimpuls"],
+ oils:["🌿","Duft & Aroma","Lavender + Frankincense","Duftimpuls",["Lavender als ruhige Duftnote für den Tagesausklang.","Frankincense als erdiger Duftimpuls für Reflexion."],["Genieße den Duft als persönlichen Ritualimpuls und beachte dabei einfach die Hinweise auf dem Produktetikett."],"Duft-/Ritualidee"],
+ meditation:["☾","Meditation","Mantra & Loslassen","Empfohlen",[p[4],"Mit jedem Ausatmen symbolisch etwas lösen, das heute nicht mehr getragen werden muss."],["Lass die Meditation einfach wirken, ohne dass danach etwas Bestimmtes anders sein muss."],"Spiritueller Impuls"],
+ journal:["✎","Journaling","Eine Frage genügt","Empfohlen",["Was darf heute einfacher, leichter oder abgeschlossen werden?"],[],"Reflexionsimpuls"]
+};
+const D=grow?common:waning;
+// V12 – Informationsarchitektur
+// Haare + Nägel werden zu einem Pflegebereich zusammengeführt.
+D.hair[1]="Haare & Nägel";
+D.hair[2]="Pflege bewusst & sanft";
+D.hair[4]=[
+  "Haare: "+(D.hair[4]?.[0] || "Pflege nach deinem eigenen Bedarf wählen."),
+  "Nägel: "+(D.nails?.[4]?.[0] || "Sanfte Pflege nach deinem eigenen Bedarf."),
+  ...(D.hair[4]||[]).slice(1)
+];
+D.hair[5]=[...(D.hair[5]||[]),...(D.nails?.[5]||[])];
+D.hair[6]="Traditioneller Mondkalender · persönliche Pflegeidee";
+
+const wellbeingImpulses=[
+ "Wie viele Treppen bist du heute schon gelaufen? Vielleicht ergibt sich später noch eine kleine Gelegenheit.",
+ "Viel gesessen? Steh kurz auf, lockere Schultern und Arme und bewege dich so, wie es angenehm ist.",
+ "Fünf Minuten draußen können schon ein schöner Unterbrecher im Alltag sein – ganz ohne Leistungsziel.",
+ "Schau für einen Moment aus dem Fenster in die Ferne und gönn deinen Augen einen Wechsel.",
+ "Mach eine alltägliche Sache heute einmal bewusst etwas langsamer.",
+ "Wann hast du heute zuletzt eine echte kleine Pause gemacht?",
+ "Wenn du schon lange sitzt: Wechsel kurz die Position oder geh ein paar Schritte.",
+ "Was würde deinem Körper heute gerade guttun: Bewegung, Ruhe oder einfach ein Positionswechsel?",
+ "Nimm einen Alltagsweg heute einmal bewusst wahr, statt ihn nur nebenbei zu erledigen.",
+ "Streck dich kurz in eine Richtung, die sich angenehm anfühlt – ohne daraus eine Übung machen zu müssen."
+];
+const wellbeingToday=wellbeingImpulses[Math.floor(now.getTime()/86400000)%wellbeingImpulses.length];
+D.health[1]="Wohlbefinden";
+D.health[2]="Weil DU am Wichtigsten bist";
+D.health[3]="Kleiner Alltagsimpuls";
+D.health[4]=[
+ wellbeingToday,
+ "Kein Ziel, kein Muss – nur eine kleine Einladung, deinen Körper im Alltag zwischendurch wahrzunehmen."
+];
+D.health[5]=["Wenn es heute nicht passt, lass den Impuls einfach vorbeiziehen."];
+D.health[6]="Alltagsimpuls · keine medizinische Empfehlung";
+
+D.meditation[1]="Meditation & Reflexion";
+D.meditation[2]="5 Minuten Ruhe + eine Frage";
+D.meditation[4]=[
+ ...(D.meditation[4]||[]),
+ "Reflexionsfrage: "+(D.journal?.[4]?.[0] || "Was möchtest du heute bewusst wahrnehmen?")
+];
+D.meditation[6]="Meditation · persönliche Reflexion";
+
+const phaseFamily = p[0].includes("Vollmond") ? "full" :
+                    p[0].includes("Neumond") ? "new" :
+                    grow ? "waxing" : "waning";
+
+const signThemes={
+ "Widder":{tone:"Mut & Bewegung",relation:"Direkt, aber freundlich kommunizieren",work:"Initiative für einen klaren nächsten Schritt"},
+ "Stier":{tone:"Ruhe & Beständigkeit",relation:"Verlässlichkeit und Nähe bewusst genießen",work:"Bestehendes solide weiterführen"},
+ "Zwillinge":{tone:"Austausch & Neugier",relation:"Fragen stellen und wirklich zuhören",work:"Ideen sammeln, ordnen und besprechen"},
+ "Krebs":{tone:"Geborgenheit & Gefühl",relation:"Nähe zulassen und eigene Grenzen achten",work:"Mit Ruhe und guter Selbstfürsorge arbeiten"},
+ "Löwe":{tone:"Ausdruck & Lebensfreude",relation:"Wertschätzung offen zeigen",work:"Sichtbar machen, worauf du stolz bist"},
+ "Jungfrau":{tone:"Klarheit & Ordnung",relation:"Praktisch unterstützen, ohne alles übernehmen zu müssen",work:"Sortieren, verbessern und vereinfachen"},
+ "Waage":{tone:"Balance & Verbindung",relation:"Ausgleich suchen, ohne dich selbst zu übergehen",work:"Abstimmen, gestalten und Prioritäten ausbalancieren"},
+ "Skorpion":{tone:"Tiefe & Wandlung",relation:"Ehrlich hinschauen, ohne vorschnell zu urteilen",work:"Konzentriert an einem wichtigen Thema bleiben"},
+ "Schütze":{tone:"Weite & Zuversicht",relation:"Gemeinsame Pläne und neue Perspektiven teilen",work:"Den größeren Zusammenhang im Blick behalten"},
+ "Steinbock":{tone:"Struktur & Verantwortung",relation:"Verbindlichkeit zeigen und Erwartungen klar halten",work:"Konsequent am Wesentlichen weiterarbeiten"},
+ "Wassermann":{tone:"Freiheit & neue Ideen",relation:"Unterschiedlichkeit stehen lassen und neugierig bleiben",work:"Ungewöhnliche Lösungswege prüfen"},
+ "Fische":{tone:"Intuition & Mitgefühl",relation:"Feine Zwischentöne wahrnehmen, ohne alles persönlich zu nehmen",work:"Kreativität Raum geben und trotzdem einen Anker setzen"}
+};
+const elementThemes={
+ "Feuer":"Heute darf etwas Lebendigkeit und Entschlossenheit mit hinein.",
+ "Erde":"Ein bodenständiger, überschaubarer Schritt kann heute guttun.",
+ "Luft":"Gedanken, Gespräche und neue Blickwinkel dürfen Raum bekommen.",
+ "Wasser":"Gefühle und feine Wahrnehmungen dürfen da sein, ohne alles bestimmen zu müssen."
+};
+const phaseThemes={
+ new:"Weniger vornehmen, dafür bewusst ausrichten.",
+ waxing:"Was bereits begonnen hat, darf Aufmerksamkeit und Energie bekommen.",
+ full:"Wahrnehmen, würdigen und nicht alles gleichzeitig intensivieren.",
+ waning:"Vereinfachen, abschließen und Überflüssiges leichter loslassen."
+};
+const T=signThemes[sign];
+
+// Add actual daily context to top summary.
+p[1]=T.tone;
+p[2]=phaseThemes[phaseFamily];
+p[3]=elementThemes[elem];
+p[4]="Mond in "+sign+": "+T.tone+".";
+D.relations[2]=T.relation;
+D.relations[4].unshift("Mond in "+sign+": "+T.relation+".");
+D.work[2]=T.work;
+D.work[4].unshift("Mond in "+sign+": "+T.work+".");
+
+// Shareable aroma suggestions: scent only, no therapeutic claims.
+const aromaByElement={
+ "Feuer":["Orange","Zitrone","Pfefferminze"],
+ "Erde":["Zedernholz","Weihrauch","Vetiver"],
+ "Luft":["Zitrone","Bergamotte","Lavendel"],
+ "Wasser":["Lavendel","Weihrauch","Geranie"]
+};
+const aromas=aromaByElement[elem];
+D.oils[1]="Duft & Aroma";
+D.oils[2]=aromas[0]+" + "+aromas[1];
+D.oils[3]="Duftimpuls";
+D.oils[4]=[
+ "Wenn du ätherische Öle verwendest, kannst du heute z. B. "+aromas[0]+" oder "+aromas[1]+" als Duftimpuls wählen.",
+ "Die Auswahl orientiert sich hier symbolisch am Element "+elem+" – nicht an einer medizinischen Wirkung.",
+ "Nutze nur Düfte, die du kennst und angenehm findest; Produkt- und Sicherheitshinweise gehen immer vor."
+];
+D.oils[5]=["Kein Duft muss heute „passen“ – du kannst die Anregung genauso gut auslassen."];
+D.oils[6]="Persönlicher Duftimpuls · keine Heil- oder Wirkversprechen";
+
+D.garden[2]=plantDay+" · "+D.garden[2];
+D.garden[3]=plantDay;
+D.garden[4].unshift(plantAdvice);
+D.garden[6]="Biodynamische Mondgarten-Tradition · "+sign+" · "+elem;
+
+function tile(x,k){
+ let [ic,n,sub,status]=x;
+ return `<div class="tile" data-key="${k}"><summary><span class="icon">${ic}</span><span class="title"><b>${n}</b><span>${sub}</span></span><span class="status">${status}</span></summary></div>`;
+}
+const keys=["garden","hair","health","relations","work","home","meditation"];
+$("tiles").innerHTML=keys.map(k=>tile(D[k],k)).join("");
+const modal=$("modal"), mc=$("modalcontent");
+function openTile(k){
+ let [ic,n,sub,status,yes,no,src]=D[k];
+ mc.innerHTML=`<div class="modalhead"><span class="icon">${ic}</span><span class="title"><b>${n}</b><span>${sub} · ${status}</span></span></div><div class="modaldetail"><ul>${yes.map(t=>`<li class="yes">${t}</li>`).join("")}${no.map(t=>`<li class="no">${t}</li>`).join("")}</ul><div class="source">${src}</div></div>`;
+ modal.classList.add("open"); modal.setAttribute("aria-hidden","false");
+}
+document.querySelectorAll(".tile").forEach(el=>el.addEventListener("click",()=>openTile(el.dataset.key)));
+$("close").onclick=()=>{modal.classList.remove("open");modal.setAttribute("aria-hidden","true")};
+modal.addEventListener("click",e=>{if(e.target===modal)$("close").click()});
+document.addEventListener("keydown",e=>{if(e.key==="Escape")$("close").click()});
+
+// --- V8: Standort per PLZ + Mondauf-/Monduntergang ---
+// PLZ wird nur zur Ortsauflösung an Open-Meteo gesendet; keine Browser-Geolokalisierung.
+const dayMs=86400000, J1970=2440588, J2000=2451545, rad2=Math.PI/180, ecl=rad2*23.4397;
+const toJulian=d=>d.valueOf()/dayMs-0.5+J1970, toDays=d=>toJulian(d)-J2000;
+function rightAscension(l,b){return Math.atan2(Math.sin(l)*Math.cos(ecl)-Math.tan(b)*Math.sin(ecl),Math.cos(l))}
+function declination(l,b){return Math.asin(Math.sin(b)*Math.cos(ecl)+Math.cos(b)*Math.sin(ecl)*Math.sin(l))}
+function astroTime(d,lw){return rad2*(280.16+360.9856235*d)-lw}
+function moonCoords(d){
+ const L=rad2*(218.316+13.176396*d), M=rad2*(134.963+13.064993*d), F=rad2*(93.272+13.229350*d);
+ const l=L+rad2*6.289*Math.sin(M), b=rad2*5.128*Math.sin(F);
+ return {ra:rightAscension(l,b),dec:declination(l,b)};
+}
+function moonAlt(date,lat,lng){
+ const lw=rad2*-lng,phi=rad2*lat,d=toDays(date),c=moonCoords(d),H=astroTime(d,lw)-c.ra;
+ let h=Math.asin(Math.sin(phi)*Math.sin(c.dec)+Math.cos(phi)*Math.cos(c.dec)*Math.cos(H));
+ h+=rad2*0.017/Math.tan(h+rad2*10.26/(h/rad2+5.10)); return h;
+}
+function moonTimes(date,lat,lng){
+ const t=new Date(date);t.setHours(0,0,0,0);const hc=0.133*rad2;
+ let h0=moonAlt(t,lat,lng)-hc,rise=null,set=null,ye;
+ for(let i=1;i<=24;i+=2){
+  const h1=moonAlt(new Date(t.getTime()+i*3600000),lat,lng)-hc;
+  const h2=moonAlt(new Date(t.getTime()+(i+1)*3600000),lat,lng)-hc;
+  const a=(h0+h2)/2-h1,b=(h2-h0)/2,xe=-b/(2*a),ye=(a*xe+b)*xe+h1,d=b*b-4*a*h1;
+  let roots=0,x1=0,x2=0;
+  if(d>=0){const dx=Math.sqrt(d)/(Math.abs(a)*2);x1=xe-dx;x2=xe+dx;if(Math.abs(x1)<=1)roots++;if(Math.abs(x2)<=1)roots++;if(x1<-1)x1=x2}
+  if(roots===1){if(h0<0)rise=i+x1;else set=i+x1}
+  else if(roots===2){rise=i+(ye<0?x2:x1);set=i+(ye<0?x1:x2)}
+  if(rise!==null&&set!==null)break;h0=h2;
+ }
+ const mk=x=>x===null?null:new Date(t.getTime()+x*3600000);
+ return {rise:mk(rise),set:mk(set),alwaysUp:rise===null&&set===null&&ye>0,alwaysDown:rise===null&&set===null&&ye<=0};
+}
+const locform=document.getElementById("locform"), pc=document.getElementById("postcode"),
+      locstatus=document.getElementById("locstatus"), mt=document.getElementById("moontimes");
+const fmt=t=>t?t.toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit"}):"–";
+locform.addEventListener("submit",async ev=>{
+ ev.preventDefault();const plz=pc.value.trim();
+ if(!/^\d{5}$/.test(plz)){locstatus.textContent="Bitte eine fünfstellige deutsche PLZ eingeben.";mt.hidden=true;return}
+ locstatus.textContent="Ort wird gesucht …";mt.hidden=true;
+ try{
+  let place=null;
+  // Primary source: Open-Meteo geocoding (supports postal-code searches).
+  try{
+    const u="https://geocoding-api.open-meteo.com/v1/search?name="+encodeURIComponent(plz+", Deutschland")+"&count=10&language=de&countryCode=DE";
+    const r=await fetch(u,{mode:"cors"}); if(r.ok){
+      const j=await r.json();
+      const rr=(j.results||[]);
+      place=rr.find(x=>Array.isArray(x.postcodes)&&x.postcodes.includes(plz)) || rr[0] || null;
+    }
+  }catch(_){}
+  // Browser fallback: public OpenStreetMap Nominatim search.
+  if(!place){
+    try{
+      const u2="https://nominatim.openstreetmap.org/search?postalcode="+encodeURIComponent(plz)+"&country=Germany&format=jsonv2&limit=1&addressdetails=1";
+      const r2=await fetch(u2,{headers:{"Accept":"application/json"}});
+      if(r2.ok){
+        const a=await r2.json(), x=a&&a[0];
+        if(x)place={latitude:+x.lat,longitude:+x.lon,name:(x.address&&(x.address.town||x.address.city||x.address.village||x.address.municipality))||plz,admin1:x.address&&x.address.state};
+      }
+    }catch(_){}
+  }
+  if(!place)throw new Error("geocoding-unavailable");
+  const times=moonTimes(now,place.latitude,place.longitude);
+  document.getElementById("moonrise").textContent=fmt(times.rise);
+  document.getElementById("moonset").textContent=fmt(times.set);
+  mt.hidden=false;
+  locstatus.textContent=(place.name||plz)+(place.admin1?" · "+place.admin1:"");
+  if(times.alwaysUp)locstatus.textContent+=" · Mond bleibt heute über dem Horizont";
+  if(times.alwaysDown)locstatus.textContent+=" · Mond bleibt heute unter dem Horizont";
+ }catch(e){
+   locstatus.textContent="Die PLZ konnte aus dieser lokalen HTML-Datei nicht aufgelöst werden. Das liegt an der Browser-Verbindung zum Ortsdienst, nicht zwingend an deiner Internetverbindung.";
+   mt.hidden=true;
+ }
+});
+
+
+// V12: Duftimpuls ist bewusst direkt sichtbar und kein eigener Lebensbereich mehr.
+(function(){
+ const t=document.getElementById("aromaText"),n=document.getElementById("aromaNote");
+ if(t)t.textContent=D.oils[2];
+ if(n)n.textContent="Optionaler Duftimpuls · keine Heil- oder Wirkversprechen.";
+})();
+
+// V13 – endgültige Kachelstruktur und sichtbarer Duftimpuls.
+(function(){
+  const tiles=document.getElementById("tiles");
+  if(tiles){
+    [...tiles.querySelectorAll(".tile")].forEach(tile=>{
+      const txt=tile.textContent || "";
+      if(
+        /^\s*Nägel\b/.test(txt) ||
+        /\bDuft\s*&\s*Aroma\b/i.test(txt) ||
+        /^\s*Journaling\b/.test(txt)
+      ) tile.remove();
+    });
+  }
+
+  const t=document.getElementById("aromaText");
+  const d=document.getElementById("aromaDetails");
+  const n=document.getElementById("aromaNote");
+  if(t) t.textContent=D.oils[2]+" · Duftimpuls";
+  if(d){
+    const yes=(D.oils[4]||[]);
+    const soft=(D.oils[5]||[]);
+    d.innerHTML =
+      yes.map(x=>'<div>✓ '+x+'</div>').join("") +
+      soft.map(x=>'<div class="soft">♡ '+x+'</div>').join("");
+  }
+  if(n) n.textContent="Persönlicher Duftimpuls · keine Heil- oder Wirkversprechen";
+})();
+
+// V14 finaler Schutz: keine bereits integrierten Bereiche als eigene Kachel anzeigen.
+(function(){
+ const root=document.getElementById("tiles");
+ if(!root)return;
+ [...root.children].forEach(tile=>{
+   const txt=(tile.textContent||"").replace(/\s+/g," ").trim();
+   if(txt.startsWith("Duft & Aroma") || txt.startsWith("Journaling") || txt.startsWith("Nägel")) tile.remove();
+ });
+})();
+
+// V15 safety check after rendering: integrated categories must never remain standalone.
+function removeIntegratedTiles(){
+ const root=document.getElementById("tiles");
+ if(!root)return;
+ [...root.querySelectorAll(".tile")].forEach(tile=>{
+   const text=(tile.textContent||"").replace(/\s+/g," ").trim();
+   if(/^Nägel(?:\s|$)/.test(text) || /^Duft\s*&\s*Aroma(?:\s|$)/i.test(text) || /^Journaling(?:\s|$)/.test(text)){
+     tile.remove();
+   }
+ });
+}
+removeIntegratedTiles();
+queueMicrotask(removeIntegratedTiles);
+</script></body></html>
