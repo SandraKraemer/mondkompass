@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Mein Mondkompass · V16</title>
+<title>Mein Mondkompass · V17</title>
 <style>
 :root{--bg:#f3f0e8;--paper:#fffdf8;--ink:#29332e;--muted:#727a72;--line:#dcddd5;--sage:#718374;--sage2:#e8eee7;--sand:#f2eadb;--rose:#f4e6e7;--blue:#e4eef0;--warn:#f7e7df}
 *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.48 system-ui,-apple-system,Segoe UI,sans-serif}
@@ -85,7 +85,7 @@ footer{font-size:.75rem;color:var(--muted);padding:22px 3px}
  .aroma-open{padding:12px}
 }
 
-/* V16 – symmetrisches Lebensbereiche-Raster */
+/* V17 – symmetrisches Lebensbereiche-Raster */
 .tiles .tile summary{
   min-height:100%;
   align-items:center;
@@ -152,7 +152,7 @@ footer{font-size:.75rem;color:var(--muted);padding:22px 3px}
 <h2 class="sectiontitle">Deine Lebensbereiche</h2>
 <p class="hint">Für kleine persönliche Empfehlungen und Hintergründe die Kachel öffnen.</p>
 <section class="tiles" id="tiles"></section><div class="modal" id="modal" aria-hidden="true"><div class="modalbox"><button class="close" id="close" aria-label="Schließen">×</button><div id="modalcontent"></div></div></div>
-<footer><b>Leselogik:</b> Der Mondkompass verbindet astronomische Angaben mit traditionellen Mondkalender-Ideen, astrologischen bzw. spirituellen Impulsen und praktischem Naturwissen. Diese Bereiche werden bewusst voneinander unterschieden. Die Anregungen sind persönliche Inspirationsangebote und enthalten keine Heilversprechen oder medizinischen Empfehlungen. Entscheide selbst, bewusst und reflektiert, was für dich stimmig und hilfreich ist – und was du einfach vorbeiziehen lässt. Duft- und Aromaideen sind ausschließlich persönliche Duftimpulse; Produkt- und Sicherheitshinweise haben Vorrang. <span class="source-note">Ortsauflösung: Open-Meteo / GeoNames; technischer Fallback: OpenStreetMap Nominatim.</span></footer>
+<footer><b>Leselogik:</b> Der Mondkompass verbindet astronomische Angaben mit traditionellen Mondkalender-Ideen, astrologischen bzw. spirituellen Impulsen und praktischem Naturwissen. Diese Bereiche werden bewusst voneinander unterschieden. Die Anregungen sind persönliche Inspirationsangebote und enthalten keine Heilversprechen oder medizinischen Empfehlungen. Entscheide selbst, bewusst und reflektiert, was für dich stimmig und hilfreich ist – und was du einfach vorbeiziehen lässt. Duft- und Aromaideen sind ausschließlich persönliche Duftimpulse; Produkt- und Sicherheitshinweise haben Vorrang. <span class="source-note">Die persönlichen Tagesimpulse wechseln kalendertäglich und bleiben innerhalb eines Tages stabil. Ortsauflösung: Open-Meteo / GeoNames; technischer Fallback: OpenStreetMap Nominatim.</span></footer>
 </main>
 <script>
 const S=29.530588853, now=new Date();
@@ -258,6 +258,61 @@ const elementMap={
  "Krebs":["Wasser","Blatttag"],"Skorpion":["Wasser","Blatttag"],"Fische":["Wasser","Blatttag"]
 };
 const [elem,plantDay]=elementMap[sign];
+
+const dayKey=now.getFullYear()*10000+(now.getMonth()+1)*100+now.getDate();
+function dailyPick(list,salt=0){
+  return list[Math.abs((dayKey*37+salt*101))%list.length];
+}
+const dailyPools={
+  reflection:[
+    "Was möchtest du heute bewusst leichter machen?",
+    "Was verdient heute deine Aufmerksamkeit – und was darf warten?",
+    "Welche kleine Sache würde deinen Tag heute freundlicher machen?",
+    "Was möchtest du heute nicht nur erledigen, sondern wirklich wahrnehmen?",
+    "Wo darf heute weniger vollkommen und dafür stimmiger sein?",
+    "Was möchtest du am Ende des Tages gern als erledigt oder geklärt ansehen?",
+    "Welche Gewohnheit tut dir heute gut – ganz ohne Leistungsanspruch?"
+  ],
+  meditation:[
+    "Nimm dir fünf ruhige Minuten und beobachte einfach deinen Atem.",
+    "Setz dich kurz ans Fenster und lass den Blick in die Ferne wandern.",
+    "Mach für fünf Minuten nichts gleichzeitig: nur sitzen, hören und wahrnehmen.",
+    "Schließe kurz die Augen und frage dich: Was brauche ich gerade wirklich?",
+    "Geh ein paar Minuten langsam und bewusst – ohne dabei etwas erledigen zu müssen.",
+    "Lass für einen Moment Handy und Aufgaben liegen und nimm deine Umgebung wahr."
+  ],
+  home:[
+    "Nimm dir heute nur eine kleine Ecke vor, die danach spürbar ruhiger wirkt.",
+    "Was liegt schon länger herum? Eine einzige Sache heute abschließen reicht.",
+    "Ein kurzer Ordnungsimpuls: eine Schublade, eine Ablage oder zehn Minuten Aufräumen.",
+    "Heute lieber vereinfachen als perfektionieren.",
+    "Schau nach etwas, das du nicht mehr brauchst und weitergeben oder aussortieren könntest."
+  ],
+  work:[
+    "Wähle eine Aufgabe, die du heute wirklich abschließen möchtest.",
+    "Bevor du Neues beginnst: Was lässt sich zuerst sauber zu Ende bringen?",
+    "Mach aus einer großen Aufgabe einen nächsten überschaubaren Schritt.",
+    "Welche offene Kleinigkeit kostet gerade unverhältnismäßig viel Aufmerksamkeit?",
+    "Heute kann weniger gleichzeitig mehr Klarheit bringen."
+  ],
+  relations:[
+    "Frag heute jemanden bewusst, wie es ihm wirklich geht – und hör einfach zu.",
+    "Eine kleine Nachricht der Wertschätzung braucht keinen besonderen Anlass.",
+    "Welche Begegnung möchtest du heute ohne Eile genießen?",
+    "Lass heute eine Kleinigkeit großzügig stehen, statt sie sofort klären zu müssen.",
+    "Sag etwas Freundliches ruhig einmal laut, statt es nur zu denken."
+  ],
+  wellbeing:[
+    "Wie viele Treppen bist du heute schon gelaufen? Vielleicht ergibt sich noch eine kleine Gelegenheit.",
+    "Viel gesessen? Steh kurz auf und bewege Schultern und Arme so, wie es angenehm ist.",
+    "Fünf Minuten draußen können ein schöner Unterbrecher im Alltag sein – ganz ohne Leistungsziel.",
+    "Schau für einen Moment aus dem Fenster in die Ferne und gönn deinen Augen einen Wechsel.",
+    "Mach eine alltägliche Sache heute einmal bewusst etwas langsamer.",
+    "Wann hast du heute zuletzt eine echte kleine Pause gemacht?",
+    "Wenn du schon lange sitzt: Wechsel kurz die Position oder geh ein paar Schritte."
+  ]
+};
+
 $("zodiac").textContent="Mond in "+sign;
 $("element").textContent="Element "+elem;
 $("plantday").textContent=plantDay;
@@ -403,6 +458,46 @@ D.garden[2]=plantDay+" · "+D.garden[2];
 D.garden[3]=plantDay;
 D.garden[4].unshift(plantAdvice);
 D.garden[6]="Biodynamische Mondgarten-Tradition · "+sign+" · "+elem;
+
+
+// V17 Tagesengine: innerhalb eines Kalendertages stabil, am Folgetag neue Variante.
+D.health[1]="Wohlbefinden";
+D.health[2]="Weil DU am Wichtigsten bist";
+D.health[3]="Kleiner Alltagsimpuls";
+D.health[4]=[
+  dailyPick(dailyPools.wellbeing,1),
+  "Kein Ziel, kein Muss – nur eine kleine Einladung, dich im Alltag zwischendurch wahrzunehmen."
+];
+D.health[5]=["Wenn es heute nicht passt, lass den Impuls einfach vorbeiziehen."];
+D.health[6]="Alltagsimpuls · keine medizinische Empfehlung";
+
+D.work[4]=[dailyPick(dailyPools.work,2),...(D.work[4]||[]).slice(0,2)];
+D.relations[4]=[dailyPick(dailyPools.relations,3),...(D.relations[4]||[]).slice(0,2)];
+D.home[4]=[dailyPick(dailyPools.home,4),...(D.home[4]||[]).slice(0,2)];
+
+D.meditation[1]="Meditation & Reflexion";
+D.meditation[2]="5 Minuten Ruhe + eine Frage";
+D.meditation[4]=[
+  dailyPick(dailyPools.meditation,5),
+  "Reflexionsfrage: "+dailyPick(dailyPools.reflection,6)
+];
+D.meditation[6]="Meditation · persönliche Reflexion";
+
+const seasonalGarden=[
+  "Winterruhe nutzen: Werkzeug, Saatgut und die nächste Gartensaison in Ruhe planen.",
+  "Saatgut prüfen und erste geschützte Voranzuchten im Blick behalten.",
+  "Frühjahr: Beete vorbereiten und robuste frühe Kulturen planen.",
+  "Frühling: Aussaat, Jungpflanzen und Bodenfeuchte werden wichtiger.",
+  "Wachstumszeit: Jungpflanzen, Beikraut und Wasserbedarf beobachten.",
+  "Frühsommer: Wachstum begleiten, stützen, pflegen und erste Ernten beobachten.",
+  "Sommer: Wasserbedarf, Ernte und Pflanzenpflege stehen im Vordergrund.",
+  "Spätsommer: ernten, verarbeiten und frei werdende Flächen im Blick behalten.",
+  "Herbstbeginn: Lagerernte, Fallobst, Blumenzwiebeln und letzte Herbstsaaten prüfen.",
+  "Herbst: ernten, einlagern, Laub sinnvoll nutzen und auf kühlere Nächte vorbereiten.",
+  "Spätherbst: Schutz und Wintervorbereitung stehen an.",
+  "Winter: Garten beobachten, schützen und die ruhigere Zeit zur Planung nutzen."
+][now.getMonth()];
+D.garden[4]=[seasonalGarden,...(D.garden[4]||[]).slice(0,3)];
 
 function tile(x,k){
  let [ic,n,sub,status]=x;
