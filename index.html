@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Mein Mondkompass · V17</title>
+<title>Mein Mondkompass · V18</title>
 <style>
 :root{--bg:#f3f0e8;--paper:#fffdf8;--ink:#29332e;--muted:#727a72;--line:#dcddd5;--sage:#718374;--sage2:#e8eee7;--sand:#f2eadb;--rose:#f4e6e7;--blue:#e4eef0;--warn:#f7e7df}
 *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.48 system-ui,-apple-system,Segoe UI,sans-serif}
@@ -85,7 +85,7 @@ footer{font-size:.75rem;color:var(--muted);padding:22px 3px}
  .aroma-open{padding:12px}
 }
 
-/* V17 – symmetrisches Lebensbereiche-Raster */
+/* V18 – symmetrisches Lebensbereiche-Raster */
 .tiles .tile summary{
   min-height:100%;
   align-items:center;
@@ -111,7 +111,14 @@ footer{font-size:.75rem;color:var(--muted);padding:22px 3px}
     justify-self:stretch;
   }
 }
-</style></head>
+</style>  <meta name="theme-color" content="#253a32">
+  <meta name="application-name" content="Mein Mondkompass">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Mondkompass">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" href="./icon-192.png" sizes="192x192" type="image/png">
+  <link rel="apple-touch-icon" href="./icon-192.png">
+</head>
 <body><main>
 <div class="top">Mein Mondkompass · Heute</div>
 <section class="hero">
@@ -460,7 +467,7 @@ D.garden[4].unshift(plantAdvice);
 D.garden[6]="Biodynamische Mondgarten-Tradition · "+sign+" · "+elem;
 
 
-// V17 Tagesengine: innerhalb eines Kalendertages stabil, am Folgetag neue Variante.
+// V18 Tagesengine: innerhalb eines Kalendertages stabil, am Folgetag neue Variante.
 D.health[1]="Wohlbefinden";
 D.health[2]="Weil DU am Wichtigsten bist";
 D.health[3]="Kleiner Alltagsimpuls";
@@ -651,4 +658,9 @@ function removeIntegratedTiles(){
 }
 removeIntegratedTiles();
 queueMicrotask(removeIntegratedTiles);
-</script></body></html>
+</script><script>
+if ("serviceWorker" in navigator) {
+ window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(()=>{}));
+}
+</script>
+</body></html>
